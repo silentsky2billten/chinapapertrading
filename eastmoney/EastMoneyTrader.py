@@ -24,14 +24,16 @@ class EastMoneyTrader:
         for g in group_element:
             print(g.text,self.group)
             if g.text == self.group:
-                if g.get_attribute("class") == "current":
+                if  "current" in g.get_attribute("class"):
                     pass
                 else:
+                    driver.execute_script("window.scrollTo(0, 0);")
+                    time.sleep(0.5)
                     g.click()
                     time.sleep(2)
     def get_assets(self):
-        asssets={}
         driver = self.driver
+        asssets={}
         zzc = driver.find_elements(By.CLASS_NAME, "bottom_name")
         for z in zzc:
             if z.text == "总资产":
@@ -46,14 +48,21 @@ class EastMoneyTrader:
     def get_positions(self):
         positions=[]
         driver = self.driver
+        ico_right_div = driver.find_element(By.CLASS_NAME, "ico_right_div")
+        ico_toggle = ico_right_div.find_element(By.CLASS_NAME, "ico_toggle")
+        if "pack" in  ico_toggle.get_attribute("class") :
+            pass
+        else:
+            ico_toggle.click()
+            time.sleep(1)
         tab = driver.find_element(By.CSS_SELECTOR, '[data-type="ccxx"]')
-        if tab.get_attribute("class") == "active":
+        if "active" in tab.get_attribute("class"):
             pass
         else:
             tab.click()
             time.sleep(2)
-        info_list = driver.find_elements(By.CLASS_NAME, "info_list")[1]
-        listpos = info_list.find_elements(By.CLASS_NAME, "content_ul")
+        # info_list = driver.find_elements(By.CLASS_NAME, "info_list")[1]
+        listpos = driver.find_elements(By.CLASS_NAME, "content_ul")
         for i,ul in enumerate(listpos):
             position={}
             tds = ul.find_elements(By.TAG_NAME, "li")
@@ -68,11 +77,15 @@ class EastMoneyTrader:
             #                                     <li class="wd100">市价</li>7
             #                                     <li class="wd100">市值</li>8
             #                                 </ul>
-            position['symbol']=ul[0].text
-            position['symbol_name']=ul[1].text
-            position['market_value']=float(ul[8].text)
-            position['amount']=float(ul[2].text)
-            position['canuse_amount']=float(ul[3].text)
+            if (i) % 5 == 0:
+                driver.execute_script("arguments[0].scrollIntoView({block: 'start'});", tds[0])
+                time.sleep(1)
+            #print(tds[0].text,tds[1].text,tds[2].text,tds[3].text,tds[4].text,tds[5].text,tds[6].text,tds[7].text,tds[8].text)
+            position['symbol']=tds[0].text
+            position['symbol_name']=tds[1].text
+            position['market_value']=float(tds[8].text)
+            position['amount']=int(tds[2].text)
+            position['canuse_amount']=int(tds[3].text)
             positions.append(position)
         return positions
     def buy(self, symbol, cash):
@@ -85,7 +98,7 @@ class EastMoneyTrader:
             print(f"buy {symbol} failed. cash is {cash}")
             return -2
         tab_buy =driver.find_element(By.CLASS_NAME, 'tab_buy')
-        if tab_buy.get_attribute("class") == "active":
+        if "active" in tab_buy.get_attribute("class"):
             pass
         else:
             tab_buy.click()
@@ -101,7 +114,7 @@ class EastMoneyTrader:
         table =select_element.find_element(By.CLASS_NAME, "sg2017table")
         tr0 = table.find_element(By.TAG_NAME, "tr")
         tr0.click()
-        time.sleep(2)
+        time.sleep(1)
         price_element = driver.find_element(By.ID, "price")
         print(price_element.get_attribute("value"))
         price = float(price_element.get_attribute("value"))    
@@ -115,13 +128,17 @@ class EastMoneyTrader:
         amount_element.send_keys(str(amount))
         time.sleep(0.5)
         buy_button = driver.find_element(By.ID, 'btnOrder')
+        disabled_attr = buy_button.get_attribute("disabled")
+        if disabled_attr is not None:
+            print(f"buy {symbol} failed. disabled_attr is {disabled_attr}")
+            return -5
         buy_button.click()
         time.sleep(5)
         return 1
     def sell(self, symbol, amount):
         driver = self.driver
-        tab_sell =driver.find_element(By.CLASS_NAME, 'tab_sell')
-        if tab_sell.get_attribute("class") == "active":
+        tab_sell =driver.find_element(By.CLASS_NAME, 'tab_sale')
+        if "active" in tab_sell.get_attribute("class"):
             pass
         else:
             tab_sell.click()
@@ -145,7 +162,11 @@ class EastMoneyTrader:
         time.sleep(0.1)
         amount_element.send_keys(str(amount))
         time.sleep(0.5)
-        buy_button = driver.find_element(By.ID, 'btnOrder')
-        buy_button.click()
+        sell_button = driver.find_element(By.ID, 'btnOrder')
+        disabled_attr = sell_button.get_attribute("disabled")
+        if disabled_attr is not None:
+            print(f"sell {symbol} failed. disabled_attr is {disabled_attr}")
+            return -5
+        sell_button.click()
         time.sleep(5)
         return 1

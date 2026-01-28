@@ -17,7 +17,7 @@ def get_last_file(dir):
     else:
         return os.path.join(dir,sorted_file_names[-1]) 
 class strategy_top_low_n:
-    def __init__(self,trader = None,data_dir ='E:\\data\\trader_tmp\\',topOrlow='top',n=15,hold_check_pluscount=5,factor_col='factor',symbol_col='symbol',symbol_type='XXXXXX',strategy='small'):
+    def __init__(self,trader = None,data_dir ='E:\\data\\trader_tmp\\',topOrlow='top',n=15,hold_check_pluscount=5,factor_col='factor',symbol_col='symbol',symbol_type='XXXXXX',symbol_type_platform='XXXXXX',strategy='small'):
         self.dir = data_dir
         self.trader = trader
         self.topOrlow = topOrlow
@@ -28,6 +28,7 @@ class strategy_top_low_n:
         self.factor_col = factor_col
         self.symbol_col = symbol_col
         self.symbol_type = symbol_type
+        self.symbol_type_platform = symbol_type_platform
         self.hold_check_pluscount = hold_check_pluscount
         self.set_trade_data()
     def buy_per_cash(self):
@@ -68,7 +69,8 @@ class strategy_top_low_n:
         print("ps",len(ps))
         for p in ps:
             #print(p['symbol'][2:],self.hold_check_data[self.symbol_col].values[0])
-            if p['symbol'][2:] not in self.hold_check_data[self.symbol_col].values:
+            p_symbol = p['symbol'] if self.symbol_type_platform == 'XXXXXX' else p['symbol'][2:]
+            if p_symbol not in self.hold_check_data[self.symbol_col].values:
                 count = p['amount']
                 if count > 0:
                     orderid = self.strategy + '_s_' + str(uuid.uuid1())
@@ -79,7 +81,8 @@ class strategy_top_low_n:
         ps =  self.trader.get_positions()
         holded = 0
         for p in ps:
-            if p['symbol'][2:] == symbol:
+            p_symbol = p['symbol'] if self.symbol_type_platform == 'XXXXXX' else p['symbol'][2:]
+            if p_symbol == symbol:
                 holded = p['market_value']
                 break
         cash = cash - holded
