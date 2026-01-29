@@ -45,16 +45,21 @@ class EastMoneyTrader:
                 text = next_sibling.text
                 asssets['cash']=float(text)  
         return asssets
-    def get_positions(self):
-        positions=[]
+    def _hide_detail(self):
         driver = self.driver
         ico_right_div = driver.find_element(By.CLASS_NAME, "ico_right_div")
         ico_toggle = ico_right_div.find_element(By.CLASS_NAME, "ico_toggle")
         if "pack" in  ico_toggle.get_attribute("class") :
             pass
         else:
+            driver.execute_script("arguments[0].scrollIntoView({block: 'start'});", ico_toggle)
+            time.sleep(0.5)
             ico_toggle.click()
             time.sleep(1)
+    def get_positions(self):
+        positions=[]
+        driver = self.driver
+        self._hide_detail()
         tab = driver.find_element(By.CSS_SELECTOR, '[data-type="ccxx"]')
         if "active" in tab.get_attribute("class"):
             pass
@@ -76,7 +81,7 @@ class EastMoneyTrader:
             #                                     <li class="wd100">浮动盈亏比</li>6
             #                                     <li class="wd100">市价</li>7
             #                                     <li class="wd100">市值</li>8
-            #                                 </ul>
+            #                                 </ul> 
             if (i) % 5 == 0:
                 driver.execute_script("arguments[0].scrollIntoView({block: 'start'});", tds[0])
                 time.sleep(1)
@@ -109,7 +114,7 @@ class EastMoneyTrader:
         symbol_input.send_keys(Keys.BACK_SPACE)
         time.sleep(0.1)
         symbol_input.send_keys(symbol)
-        time.sleep(1)
+        time.sleep(2)
         select_element = symbol_input.find_element(By.XPATH, 'following-sibling::*[1]')
         table =select_element.find_element(By.CLASS_NAME, "sg2017table")
         tr0 = table.find_element(By.TAG_NAME, "tr")
@@ -149,7 +154,7 @@ class EastMoneyTrader:
         symbol_input.send_keys(Keys.BACK_SPACE)
         time.sleep(0.1)
         symbol_input.send_keys(symbol)
-        time.sleep(1)
+        time.sleep(2)
         select_element = symbol_input.find_element(By.XPATH, 'following-sibling::*[1]')
         table =select_element.find_element(By.CLASS_NAME, "sg2017table")
         tr0 = table.find_element(By.TAG_NAME, "tr")
@@ -170,3 +175,24 @@ class EastMoneyTrader:
         sell_button.click()
         time.sleep(5)
         return 1
+    def cancel_pending_orders(self):
+        driver = self.driver
+        self._hide_detail()
+        tab = driver.find_element(By.CSS_SELECTOR, '[data-type="gd"]')
+        if "active" in tab.get_attribute("class"):
+            pass
+        else:
+            tab.click()
+            time.sleep(2)
+        chedans = driver.find_elements(By.CLASS_NAME, "chedan")
+        while len(chedans) > 0:
+            chedan = chedans[0]
+            chedan.click()
+            time.sleep(1)
+            btnCxcConfirm = driver.find_element(By.ID, "btnCxcConfirm")
+            btnCxcConfirm.click()
+            time.sleep(1)
+            btnCxcConfirm = driver.find_element(By.ID, "btnCxcConfirm")
+            btnCxcConfirm.click()
+            time.sleep(1)
+            chedans = driver.find_elements(By.CLASS_NAME, "chedan")

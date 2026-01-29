@@ -91,6 +91,7 @@ class strategy_top_low_n:
         if r>0:
             print(Result(orderid,msg=f"buy success. {symbol},{cash}" ))
     def trade(self):
+        self.trader.cancel_pending_orders()
         self.sell()
         time.sleep(1)
         for symbol in self.data[self.symbol_col].values:

@@ -141,3 +141,5 @@ class SnowTrader:
         confirm_button = order.find_elements(By.CLASS_NAME, "modal__confirm__submit")[-1]
         confirm_button.click()
         time.sleep(1)
+    def cancel_pending_orders(self):
+        return
