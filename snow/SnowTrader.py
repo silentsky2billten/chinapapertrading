@@ -16,6 +16,8 @@ class SnowTrader:
             driver.switch_to.window(window)
             if "雪球" in driver.title:
                 break
+        driver.execute_script("document.body.scrollTop = 0; document.documentElement.scrollTop = 0;")
+        time.sleep(0.5)
         group_element = driver.find_elements(By.CLASS_NAME, "moni__tabs__controls")
         for g in group_element:
             print(g.text,self.group)
